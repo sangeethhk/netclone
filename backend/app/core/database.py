@@ -8,9 +8,9 @@ import json
 import os
 import time
 from typing import List, Dict, Optional, Any
-from app.config import IOT_DEVICES
+from app.config import IOT_DEVICES, DATABASE_PATH
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "netclone.db")
+DB_PATH = DATABASE_PATH
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -107,12 +107,19 @@ def init_db():
     """)
     
     conn.commit()
+    conn.close()
+    seed_default_devices(force=False)
 
-    # Seed baseline devices if empty
-    cursor.execute("SELECT count(*) FROM devices")
-    if cursor.fetchone()[0] == 0:
-        now = time.time()
-        for dev_id, cfg in IOT_DEVICES.items():
+def seed_default_devices(force: bool = False):
+    """Ensures all baseline IoT devices are seeded into the database."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    now = time.time()
+    for dev_id, cfg in IOT_DEVICES.items():
+        if force:
+            cursor.execute("DELETE FROM devices WHERE id = ?", (dev_id,))
+        cursor.execute("SELECT id FROM devices WHERE id = ?", (dev_id,))
+        if not cursor.fetchone():
             cursor.execute("""
             INSERT INTO devices (
                 id, name, category, ip, mac, open_ports_json, protocols_json, mode,
@@ -127,8 +134,7 @@ def init_db():
                 cfg["firmware"], 12.0, 25.0, 0, 0.0, 2.4 if cfg["id"] != "dev_gateway_00" else 0.5,
                 1, None, None, now, now
             ))
-        conn.commit()
-        
+    conn.commit()
     conn.close()
 
 # Device Helper Functions

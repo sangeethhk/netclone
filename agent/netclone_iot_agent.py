@@ -93,7 +93,7 @@ def stream_telemetry(server_url: str, device_id: str, interval: float, simulate_
     seq = 0
     
     print("\n" + "=" * 65)
-    print(f" NetClone Physical IoT Agent Active")
+    print(" NetClone Physical IoT Agent Active")
     print(f" - Device ID : {device_id}")
     print(f" - Server URL: {server_url}")
     print(f" - Mode      : {'ANOMALOUS / ATTACK' if simulate_anomaly else 'NOMINAL / BENIGN'}")

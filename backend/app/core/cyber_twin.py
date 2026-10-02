@@ -132,7 +132,10 @@ class CyberTwin:
             return False, 0.0
             
         dev = self.devices[device_id]
-        reachable, latency = await ping_device_socket(dev.ip, dev.open_ports)
+        if dev.mode == "VIRTUAL":
+            reachable, latency = True, 1.2
+        else:
+            reachable, latency = await ping_device_socket(dev.ip, dev.open_ports)
         
         dev.is_live_reachable = reachable
         dev.ping_latency_ms = latency
@@ -241,6 +244,7 @@ class CyberTwin:
 
     def reset_all(self):
         """Resets all Cyber Twin devices to default baseline."""
+        database.seed_default_devices(force=False)
         self.load_from_db()
         for dev in self.devices.values():
             dev.status = "NORMAL"

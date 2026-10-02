@@ -10,6 +10,11 @@ import asyncio
 import os
 import sys
 
+from app.config import (
+    APP_NAME, APP_VERSION, APP_DESCRIPTION,
+    ADMIN_DEFAULT_USERNAME, ADMIN_DEFAULT_PASSWORD,
+    OPERATOR_DEFAULT_USERNAME, OPERATOR_DEFAULT_PASSWORD
+)
 from app.core import database
 from app.core.mlsa_auth import mlsa_engine
 from app.models.autoencoder import AutoencoderDetector
@@ -30,38 +35,38 @@ IF_PATH = os.path.join(CACHE_DIR, "isolation_forest.joblib")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. Initialize SQLite Database
-    print("[NetClone] Initializing persistent database...")
+    print(f"[{APP_NAME}] Initializing persistent database...")
     database.init_db()
     
-    # 2. Seed Default MLSA Users for demonstration
-    if not database.get_user("admin"):
-        print("[NetClone] Enrolling default MLSA administrative identity...")
+    # 2. Seed Default MLSA Users for demonstration (configurable via environment)
+    if not database.get_user(ADMIN_DEFAULT_USERNAME):
+        print(f"[{APP_NAME}] Enrolling default MLSA administrative identity...")
         mlsa_engine.register_user(
-            username="admin",
-            password="AdminPassword#2026",
+            username=ADMIN_DEFAULT_USERNAME,
+            password=ADMIN_DEFAULT_PASSWORD,
             role="security_admin",
             device_id="dev_gateway_00"
         )
-    if not database.get_user("iot_engineer"):
-        print("[NetClone] Enrolling default MLSA field operator...")
+    if not database.get_user(OPERATOR_DEFAULT_USERNAME):
+        print(f"[{APP_NAME}] Enrolling default MLSA field operator...")
         mlsa_engine.register_user(
-            username="iot_engineer",
-            password="SmartSensor$77",
+            username=OPERATOR_DEFAULT_USERNAME,
+            password=OPERATOR_DEFAULT_PASSWORD,
             role="field_operator",
             device_id="dev_plc_03"
         )
         
     # 3. Load or Initialize AI Threat Detection Models
-    print("[NetClone] Initializing AI Threat Detection Engine...")
+    print(f"[{APP_NAME}] Initializing AI Threat Detection Engine...")
     ae = AutoencoderDetector(input_dim=10)
     iso = IsolationForestDetector()
     
     if os.path.exists(AE_PATH) and os.path.exists(IF_PATH):
-        print(f"[NetClone] Loading pre-trained models from {CACHE_DIR}...")
+        print(f"[{APP_NAME}] Loading pre-trained models from {CACHE_DIR}...")
         ae.load_weights(AE_PATH)
         iso.load_weights(IF_PATH)
     else:
-        print("[NetClone] Training baseline AI models on normal IoT distributions...")
+        print(f"[{APP_NAME}] Training baseline AI models on normal IoT distributions...")
         from app.core.traffic_generator import traffic_gen
         normal_data = traffic_gen.generate_baseline_dataset(n_samples=1000)
         ae.train_baseline(normal_data, epochs=30)
@@ -73,28 +78,34 @@ async def lifespan(app: FastAPI):
     detector_holder["autoencoder"] = ae
     detector_holder["iso_forest"] = iso
     detector_holder["ensemble"] = ensemble
-    print("[NetClone] AI Ensemble ready (Autoencoder + Isolation Forest active).")
+    print(f"[{APP_NAME}] AI Ensemble ready (Autoencoder + Isolation Forest active).")
     
     # 4. Start Background Telemetry & Simulation Loop
     bg_task = asyncio.create_task(telemetry_background_loop())
-    print("[NetClone] Background telemetry & Cyber Twin loop started.")
+    print(f"[{APP_NAME}] Background telemetry & Cyber Twin loop started.")
     
     yield
     
     bg_task.cancel()
-    print("[NetClone] Server shutting down cleanly.")
+    print(f"[{APP_NAME}] Server shutting down cleanly.")
 
 app = FastAPI(
-    title="NetClone Cyber Twin Framework API",
-    description="AI-Driven Cyber Twin with Multi-Layer Security Authentication (MLSA) & Automated Defense",
-    version="2.0.0",
+    title=f"{APP_NAME} Cyber Twin Framework API",
+    description=APP_DESCRIPTION,
+    version=APP_VERSION,
     lifespan=lifespan
 )
 
-# Enable CORS for React frontend (Vite default port 5173 / localhost)
+# Dynamic CORS Configuration from Environment
+cors_env = os.getenv("CORS_ORIGINS", "*")
+if cors_env.strip() == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [o.strip() for o in cors_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -112,12 +123,13 @@ app.include_router(ws_router)
 @app.get("/")
 def root():
     return {
-        "framework": "NetClone",
-        "description": "AI-Driven Cyber Twin Framework with MLSA & Automated Defense",
-        "version": "2.0.0",
+        "framework": APP_NAME,
+        "description": APP_DESCRIPTION,
+        "version": APP_VERSION,
         "status": "OPERATIONAL"
     }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    from app.config import HOST, PORT
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)

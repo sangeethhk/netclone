@@ -19,6 +19,7 @@ import {
   Laptop
 } from 'lucide-react';
 import { api } from '../services/api';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function DeviceFleetManager({ onRefreshTopology }) {
   const [devices, setDevices] = useState([]);
@@ -31,8 +32,8 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
 
   // Add Device Form State
   const [name, setName] = useState('');
-  const [ip, setIp] = useState('192.168.1.');
-  const [mac, setMac] = useState('B8:27:EB:');
+  const [ip, setIp] = useState('');
+  const [mac, setMac] = useState('');
   const [category, setCategory] = useState('Smart Home / Surveillance (IP Camera)');
   const [portsStr, setPortsStr] = useState('80, 554');
   const [protocolsStr, setProtocolsStr] = useState('HTTP, RTSP');
@@ -44,8 +45,9 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
   const [scanSubnet, setScanSubnet] = useState('');
   const [scanResults, setScanResults] = useState(null);
 
-  // Ping tracking
+  // Ping & Telemetry simulation tracking
   const [pingingId, setPingingId] = useState(null);
+  const [simulatingId, setSimulatingId] = useState(null);
 
   const fetchDevices = async () => {
     setLoading(true);
@@ -59,20 +61,51 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
     }
   };
 
+  const handleSimulateTelemetry = async (deviceId) => {
+    setSimulatingId(deviceId);
+    try {
+      await api.ingestTelemetry({
+        device_id: deviceId,
+        telemetry: {
+          temperature_c: +(22 + Math.random() * 4).toFixed(1),
+          humidity_pct: +(45 + Math.random() * 8).toFixed(1),
+          cpu_load_pct: +(10 + Math.random() * 20).toFixed(1),
+          status: 'NOMINAL'
+        },
+        cpu_usage: +(10 + Math.random() * 15).toFixed(1),
+        memory_usage: +(25 + Math.random() * 10).toFixed(1),
+        protocol: 'HTTP'
+      });
+      await fetchDevices();
+      if (onRefreshTopology) onRefreshTopology();
+    } catch (err) {
+      alert(`Telemetry stream failed: ${err.message}`);
+    } finally {
+      setSimulatingId(null);
+    }
+  };
+
   useEffect(() => {
     fetchDevices();
   }, []);
 
   const handleAddDevice = async (e) => {
     e.preventDefault();
+    const cleanIp = ip.trim();
+    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    if (!ipv4Regex.test(cleanIp)) {
+      alert('Please enter a valid complete IPv4 address (e.g. 192.168.1.105)');
+      return;
+    }
+
     try {
       const ports = portsStr.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p));
       const protocols = protocolsStr.split(',').map(p => p.trim()).filter(Boolean);
       
       await api.addDevice({
         name,
-        ip,
-        mac,
+        ip: cleanIp,
+        mac: mac.trim() || undefined,
         category,
         open_ports: ports.length > 0 ? ports : [80],
         protocols: protocols.length > 0 ? protocols : ['TCP'],
@@ -82,6 +115,8 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
 
       setShowAddModal(false);
       setName('');
+      setIp('');
+      setMac('');
       fetchDevices();
       if (onRefreshTopology) onRefreshTopology();
     } catch (err) {
@@ -90,7 +125,7 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(`Delete device ${id} from NetClone Cyber Twin?`)) return;
+    if (!window.confirm(`Delete device ${id} from ${BRAND_CONFIG.name} Cyber Twin?`)) return;
     try {
       await api.deleteDevice(id);
       fetchDevices();
@@ -139,7 +174,7 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
         mode: 'PHYSICAL',
         telemetry_type: `Discovered via Subnet Probe (${disc.vendor})`
       });
-      alert(`Imported ${disc.ip} into NetClone as a Physical Device!`);
+      alert(`Imported ${disc.ip} into ${BRAND_CONFIG.name} as a Physical Device!`);
       fetchDevices();
       if (onRefreshTopology) onRefreshTopology();
     } catch (err) {
@@ -327,9 +362,19 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
                     <td className="py-3 px-3 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          onClick={() => handleSimulateTelemetry(dev.id)}
+                          disabled={simulatingId === dev.id}
+                          className="px-2 py-1 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 text-[11px] font-sans transition-colors flex items-center gap-1"
+                          title="Stream live test sensor telemetry to Cyber Twin"
+                        >
+                          <Activity className="w-3 h-3 text-cyan-400" />
+                          <span>{simulatingId === dev.id ? 'Streaming...' : 'Stream'}</span>
+                        </button>
+
+                        <button
                           onClick={() => handlePing(dev.id)}
                           disabled={pingingId === dev.id}
-                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 text-[11px] font-sans transition-colors"
+                          className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-sans transition-colors"
                           title="Ping hardware socket"
                         >
                           {pingingId === dev.id ? 'Pinging...' : 'Ping'}
@@ -392,6 +437,7 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
                   <label className="text-slate-400 block mb-1">IP Address</label>
                   <input
                     type="text"
+                    placeholder="192.168.1.105"
                     value={ip}
                     onChange={(e) => setIp(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
@@ -399,9 +445,10 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
                   />
                 </div>
                 <div>
-                  <label className="text-slate-400 block mb-1">MAC Address</label>
+                  <label className="text-slate-400 block mb-1">MAC Address (Optional)</label>
                   <input
                     type="text"
+                    placeholder="B8:27:EB:12:34:56"
                     value={mac}
                     onChange={(e) => setMac(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 font-mono focus:outline-none focus:border-cyan-500"
@@ -544,7 +591,7 @@ export default function DeviceFleetManager({ onRefreshTopology }) {
             </div>
 
             <p className="text-xs text-slate-300 mb-4">
-              Run this ready-to-use Python client agent on your <strong>Raspberry Pi</strong>, laptop, or physical device to stream real live telemetry into NetClone:
+              Run this ready-to-use Python client agent on your <strong>Raspberry Pi</strong>, laptop, or physical device to stream real live telemetry into {BRAND_CONFIG.name}:
             </p>
 
             {/* Python Agent Command */}

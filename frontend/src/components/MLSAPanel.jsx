@@ -16,6 +16,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { api } from '../services/api';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function MLSAPanel({ activeThreatLevel }) {
   const [username, setUsername] = useState('admin');
@@ -312,7 +313,7 @@ export default function MLSAPanel({ activeThreatLevel }) {
               </span>
               <p className="text-slate-400 leading-relaxed text-[11px]">
                 In conventional databases, leaking positive hashes like <code>MD5/SHA256(P)</code> allows attackers to crack credentials using GPU dictionary attacks.
-                NetClone's MLSA represents credentials in the <em>negative domain</em>, storing complement clauses <code>U \ &#123;P&#125;</code> and negative digest masks. Reconstructing positive passwords from this negative constraint space is computationally intractable (NP-hard).
+                {BRAND_CONFIG.name}'s MLSA represents credentials in the <em>negative domain</em>, storing complement clauses <code>U \ &#123;P&#125;</code> and negative digest masks. Reconstructing positive passwords from this negative constraint space is computationally intractable (NP-hard).
               </p>
             </div>
 

@@ -14,6 +14,7 @@ import {
   ExternalLink,
   ShieldBan
 } from 'lucide-react';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function CyberTwinTopology({ 
   topology, 
@@ -70,7 +71,7 @@ export default function CyberTwinTopology({
       <div className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl cyber-card gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-white tracking-wide">NetClone Cyber Twin Topology</h2>
+            <h2 className="text-base font-bold text-white tracking-wide">{BRAND_CONFIG.name} Cyber Twin Topology</h2>
             <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
               Safe Sandbox Environment
             </span>

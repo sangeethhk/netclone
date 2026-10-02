@@ -7,6 +7,7 @@ import hmac
 import secrets
 import time
 import base64
+import os
 from typing import Tuple, List, Dict, Optional, Any
 from app.config import MLSA_CONFIG
 from app.models.schemas import NegativeVectorView, MLSAAuthResponse
@@ -16,8 +17,12 @@ class MLSAEngine:
     def __init__(self):
         self.iterations = MLSA_CONFIG["pbkdf2_iterations"]
         self.num_negative_vectors = MLSA_CONFIG["negative_password_vectors"]
-        # Master encryption key generated in-memory or persisted for token signing
-        self.master_key = secrets.token_bytes(32)
+        # Master encryption key loaded from environment variable or securely generated
+        env_key = os.getenv("MLSA_MASTER_KEY")
+        if env_key:
+            self.master_key = env_key.encode('utf-8')[:32].ljust(32, b'0')
+        else:
+            self.master_key = secrets.token_bytes(32)
 
     def _generate_negative_rules(self, password: str, salt: bytes) -> List[Dict[str, Any]]:
         r"""

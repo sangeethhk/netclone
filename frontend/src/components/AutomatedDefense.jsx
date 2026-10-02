@@ -14,6 +14,7 @@ import {
   Flame
 } from 'lucide-react';
 import { api } from '../services/api';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function AutomatedDefense({ 
   defenseState, 
@@ -76,7 +77,7 @@ export default function AutomatedDefense({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-white tracking-wide">
-                NetClone Automated Defense & Dynamic Firewall Engine
+                {BRAND_CONFIG.name} Automated Defense & Dynamic Firewall Engine
               </h2>
               <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
                 Autonomous Incident Response
@@ -286,7 +287,7 @@ export default function AutomatedDefense({
           <div className="cyber-card rounded-2xl p-6 max-w-md w-full border border-cyan-500/50 shadow-2xl">
             <h3 className="text-sm font-bold text-white mb-1">Create Dynamic Firewall Rule</h3>
             <p className="text-xs text-slate-400 mb-4">
-              Inject custom filtering rules directly into the NetClone automated defense layer.
+              Inject custom filtering rules directly into the {BRAND_CONFIG.name} automated defense layer.
             </p>
 
             <form onSubmit={handleCreateRule} className="space-y-3 text-xs">

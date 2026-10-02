@@ -1,4 +1,5 @@
 import React from 'react';
+import { BRAND_CONFIG } from '../config/branding';
 import { 
   ShieldAlert, 
   ShieldCheck, 
@@ -77,12 +78,12 @@ export default function Navbar({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-white tracking-wide">NetClone</h1>
+              <h1 className="text-lg font-bold text-white tracking-wide">{BRAND_CONFIG.name}</h1>
               <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">
-                v2.0 Cyber Twin
+                {BRAND_CONFIG.badgeText}
               </span>
             </div>
-            <p className="text-xs text-slate-400">AI-Driven Threat Simulation & MLSA Defense</p>
+            <p className="text-xs text-slate-400">{BRAND_CONFIG.tagline}</p>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 """
 NetClone Attack Graph & Lateral Movement Kill-Chain Engine
 Models the cyber-physical IoT network as a directed attack graph to track lateral progression,
-vulnerability exposure, and automated defense cut-points (Slide 19).
+vulnerability exposure, and automated defense cut-points.
 """
 from typing import List, Dict, Optional, Any
 from app.models.schemas import AttackGraphNode, AttackGraphEdge, AttackGraphResponse

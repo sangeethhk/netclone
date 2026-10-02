@@ -16,7 +16,7 @@ FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 
 def main():
     print("=" * 65)
-    print("      NETCLONE: AI CYBER TWIN FRAMEWORK & MLSA DEFENSE")
+    print("       NETCLONE: AI CYBER TWIN FRAMEWORK & MLSA DEFENSE")
     print("=" * 65)
     print("[1/3] Verifying backend AI models...")
     

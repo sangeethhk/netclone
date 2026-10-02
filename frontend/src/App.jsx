@@ -13,6 +13,7 @@ import XAIPanel from './components/XAIPanel';
 import MLSABreachBench from './components/MLSABreachBench';
 import { api } from './services/api';
 import { AlertOctagon, ShieldAlert, X } from 'lucide-react';
+import { BRAND_CONFIG } from './config/branding';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('topology');
@@ -326,7 +327,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-slate-900 py-4 text-center text-xs text-slate-500 font-mono">
-        NetClone Framework v2.0 • AI-Driven Cyber Twin & MLSA Defense System • Group 6 (Project Guide: Nihala UK)
+        {BRAND_CONFIG.footerText}
       </footer>
     </div>
   );

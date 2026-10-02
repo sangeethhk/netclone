@@ -12,6 +12,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { api } from '../services/api';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function MLSABreachBench() {
   const [username, setUsername] = useState('admin');
@@ -48,7 +49,7 @@ export default function MLSABreachBench() {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Empirical simulation comparing traditional SHA-256 positive hash cracking against NetClone's Encrypted Negative Passwords during database leaks.
+              Empirical simulation comparing traditional SHA-256 positive hash cracking against {BRAND_CONFIG.name}'s Encrypted Negative Passwords during database leaks.
             </p>
           </div>
         </div>
@@ -131,7 +132,7 @@ export default function MLSABreachBench() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white">NetClone MLSA (Negative Database)</h3>
+                  <h3 className="text-sm font-bold text-white">{BRAND_CONFIG.name} MLSA (Negative Database)</h3>
                 </div>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
                   UNCRACKED / SECURE

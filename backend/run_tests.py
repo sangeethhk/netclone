@@ -25,7 +25,7 @@ from tests.test_netclone import (
 
 def run_all():
     print("=" * 65)
-    print("      NETCLONE EXTENDED BACKEND AUTOMATED TEST SUITE")
+    print("       NETCLONE EXTENDED BACKEND AUTOMATED TEST SUITE")
     print("=" * 65)
     
     tests = [

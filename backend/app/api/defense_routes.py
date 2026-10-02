@@ -14,6 +14,7 @@ from app.core.defense_engine import defense_engine
 from app.core.cyber_twin import cyber_twin
 from app.core.attack_simulator import attack_sim
 from app.core import database
+from app.config import APP_NAME
 
 router = APIRouter(prefix="/api/defense", tags=["Automated Defense"])
 
@@ -120,7 +121,7 @@ def generate_incident_report():
     rules = database.get_active_firewall_rules()
     
     summary = (
-        f"NetClone Cyber Twin Defense Audit: {len(alerts)} threat events recorded. "
+        f"{APP_NAME} Cyber Twin Defense Audit: {len(alerts)} threat events recorded. "
         f"{len(rules)} active dynamic firewall rules enforcing perimeter protection. "
         f"{len(quarantined)} IoT devices currently isolated in quarantine. "
         f"AI threat detection models operating with multi-layer MLSA authentication safeguards."

@@ -1,8 +1,33 @@
 """
 NetClone Configuration Module
-Defines IoT profiles, AI thresholds, MLSA security parameters, and defense policies.
+Defines IoT profiles, AI thresholds, MLSA security parameters, defense policies,
+and environment-driven runtime settings.
 """
+import os
 from typing import Dict, List, Any
+
+# Application Branding & Metadata
+APP_NAME: str = os.getenv("APP_NAME", "NetClone")
+APP_VERSION: str = os.getenv("APP_VERSION", "2.0.0")
+APP_DESCRIPTION: str = os.getenv(
+    "APP_DESCRIPTION",
+    "Enterprise AI-Driven Cyber Twin with Multi-Layer Security Authentication (MLSA) & Automated Defense"
+)
+HOST: str = os.getenv("HOST", "127.0.0.1")
+PORT: int = int(os.getenv("PORT", 8000))
+DEBUG: bool = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
+
+# Database & Storage
+DATABASE_PATH: str = os.getenv(
+    "DATABASE_PATH",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "netclone.db")
+)
+
+# Authentication & Default Credential Seeds
+ADMIN_DEFAULT_USERNAME: str = os.getenv("ADMIN_DEFAULT_USERNAME", "admin")
+ADMIN_DEFAULT_PASSWORD: str = os.getenv("ADMIN_DEFAULT_PASSWORD", "AdminPassword#2026")
+OPERATOR_DEFAULT_USERNAME: str = os.getenv("OPERATOR_DEFAULT_USERNAME", "iot_engineer")
+OPERATOR_DEFAULT_PASSWORD: str = os.getenv("OPERATOR_DEFAULT_PASSWORD", "SmartSensor$77")
 
 # IoT Device Registry & Baseline Configurations
 IOT_DEVICES: Dict[str, Dict[str, Any]] = {

@@ -9,12 +9,13 @@ from typing import Dict, Any, Optional
 from app.models.schemas import BreachBenchResult
 from app.core import database
 from app.core.mlsa_auth import mlsa_engine
+from app.config import ADMIN_DEFAULT_PASSWORD, OPERATOR_DEFAULT_PASSWORD
 
 # Common password wordlist for simulated dictionary attack
 CRACKING_WORDLIST = [
     "123456", "password", "12345678", "qwerty", "123456789", "12345",
     "1234", "111111", "1234567", "dragon", "admin", "welcome",
-    "AdminPassword#2026", "SmartSensor$77", "root", "toor", "pass123",
+    ADMIN_DEFAULT_PASSWORD, OPERATOR_DEFAULT_PASSWORD, "root", "toor", "pass123",
     "camera_pass", "iot_gateway", "scada_admin", "hospital_iot"
 ]
 
@@ -28,11 +29,9 @@ class BreachSimulator:
         """
         user_record = database.get_user(username)
         if not user_record:
-            # Fallback to test credential
-            target_pass = "AdminPassword#2026"
+            target_pass = ADMIN_DEFAULT_PASSWORD
         else:
-            # For demonstration, retrieve or test credential
-            target_pass = "AdminPassword#2026" if username == "admin" else "SmartSensor$77"
+            target_pass = ADMIN_DEFAULT_PASSWORD if username == "admin" else OPERATOR_DEFAULT_PASSWORD
 
         # --- Benchmark 1: Traditional Positive Hash Dump (SHA-256) ---
         sha256_hash = hashlib.sha256(target_pass.encode()).hexdigest()

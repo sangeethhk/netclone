@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   CheckCircle2
 } from 'lucide-react';
+import { BRAND_CONFIG } from '../config/branding';
 
 export default function AttackSimulator({ 
   scenarios, 
@@ -41,7 +42,7 @@ export default function AttackSimulator({
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-red-500 animate-pulse" />
             <h2 className="text-base font-bold text-white tracking-wide">
-              NetClone Attack Simulation Deck
+              {BRAND_CONFIG.name} Attack Simulation Deck
             </h2>
             <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-red-950 text-red-400 border border-red-800">
               Safe Isolated Cyber Twin Sandbox

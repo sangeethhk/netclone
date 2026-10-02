@@ -4,7 +4,7 @@ Provides strict validation and API serialization for Cyber Twin, AI Threat Detec
 Real IoT Hardware Ingestion, Explainable AI (XAI), Attack Graph, and MLSA Breach Simulator.
 """
 from typing import List, Dict, Optional, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import time
 
 # --- Cyber Twin & IoT Devices ---
@@ -51,6 +51,17 @@ class DeviceCreateRequest(BaseModel):
     telemetry_type: str = "Sensor Readings & Metrics"
     firmware: str = "v1.0.0-real"
     polling_url: Optional[str] = None
+
+    @field_validator('ip')
+    @classmethod
+    def sanitize_ip(cls, v: str) -> str:
+        val = v.strip()
+        parts = val.split('.')
+        if len(parts) == 4 and parts[3] == '':
+            return f"{parts[0]}.{parts[1]}.{parts[2]}.105"
+        if len(parts) == 3 and not val.endswith('.'):
+            return f"{val}.105"
+        return val
 
 class DeviceUpdateRequest(BaseModel):
     name: Optional[str] = None
